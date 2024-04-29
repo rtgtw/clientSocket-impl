@@ -60,17 +60,89 @@ int main() {
 	//Create socket address service variable to store server ip/port details to connect
 	sockaddr_in clientService;
 	clientService.sin_family = AF_INET;
-	InetPton(AF_INET, (L"127.0.0.1"), &clientService.sin_addr.s_addr);
+	InetPton(AF_INET, (L"192.168.87.22"), &clientService.sin_addr.s_addr);
 	clientService.sin_port = htons(port);
 	if (connect(clientSocket, (SOCKADDR*)&clientService, sizeof(clientService)) == SOCKET_ERROR) {
 		std::cout << "Client: connect() - Failed to connect." << std::endl;
 		WSACleanup();
+		std::cin.get();
+		system("pause");
 		return 0;
 	}else{
 		std::cout << "Client: Connected! " << std::endl;
 		std::cout << "Client: Can start sending and receiving data..." << std::endl;
 	
+	
 	}
+
+
+
+	//A new socket is not created for the client, the socket used to connect to the server
+	//is the same socket used for the client
+
+
+
+	//TCP requires a connection to be established
+	//We can use the send() function to send data
+	//Send will return an int of the number of bytes sent, or socket error if unsuccesful
+	//We need to create a buffer that will be used to send the data 
+
+
+	for (int i = 0; i < 1000; i++) {
+		//SEND
+
+		const int bufferSize = 200;
+
+		//create buffer
+		char buffer[bufferSize];
+
+
+
+		//Enter message to be sent to server/client
+		std::cout << "Enter your message:";
+
+		//Store message in buffer
+		std::cin.getline(buffer, bufferSize);
+
+		//use the send function to send out the message, and do error handling
+		//send returns an int of the amount of bytes sent
+		int byteCount = send(clientSocket, buffer, bufferSize, 0);
+		if (byteCount == SOCKET_ERROR) {
+			std::cout << "Sever send error: " << WSAGetLastError() << std::endl;
+			return -1;
+		}
+		else {
+			/*std::cout << "Success! Server received: " << byteCount << " bytes of data.." << std::endl;*/
+		}
+
+
+
+
+
+
+		//RECIEVE
+		//Recieve data incoming from the client with recv
+		//almost the same process
+		const int recievebufferSize = 200;
+		char recieveBuffer[recievebufferSize];
+
+
+
+		int recievebyteCount = recv(clientSocket, recieveBuffer, recievebufferSize, 0);
+		if (recievebyteCount < 0) {
+			std::cout << "Server: error " << WSAGetLastError;
+			return 0;
+		}
+		else {
+			//If its successful the recieve buffer will be the reply
+			std::cout << "Server: " << recieveBuffer << std::endl;
+
+		}
+
+
+	}
+
+	std::cin.get();
 	system("pause");
 	WSACleanup();
 
