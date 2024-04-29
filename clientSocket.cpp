@@ -105,7 +105,7 @@ int main() {
 
 	std::cout << "Got file path which is, " << filePath << std::endl;
 
-	system("pause");
+	
 
 
 	//open the file to be read
@@ -139,7 +139,7 @@ int main() {
 
 	//Create a bytes read since send returns the number of bytes
 	int bytesRead;
-	std::cout << "right before while loop" << std::endl;
+	
 	
 
 	inputFile.read(buffer, fileSize);
@@ -150,7 +150,7 @@ int main() {
 	
 	send(clientSocket, buffer, fileSize, 0);
 
-	std::cout << "Sent data?" << std::endl;
+	std::cout << "Sent" << std::endl;
 
 
 	//while ((bytesRead = inputFile.read(buffer, bufferSize)) > 0) {
@@ -175,7 +175,7 @@ int main() {
 
 	//close the file after its done reading it to the buffer
 	std::cout << "closed" << std::endl;
-	system("pause");
+	
 	inputFile.close();
 
 
