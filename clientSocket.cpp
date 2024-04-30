@@ -6,6 +6,8 @@
 #include <iostream>	
 #include <string>
 #include <fstream>
+#include <algorithm>
+#include <stdlib.h>
 
 int main() {
 
@@ -130,49 +132,90 @@ int main() {
 
 	
 	inputFile.seekg(0, std::ios::end);
+
 	int fileSize = inputFile.tellg();
+	std::cout << "Size of file " << fileSize << std::endl;
 	inputFile.seekg(0, std::ios::beg);
+
+
 
 	//Send data in chunks, create buffer
 	const int bufferSize = 1024;
 	char buffer[bufferSize];
+	
+	
+	//Read the data into the buffer
+	//Read in chunks
+	/*inputFile.read(buffer, fileSize);*/
 
-	//Create a bytes read since send returns the number of bytes
+
+
+	//The goal is the send the data in chunks, create a loop
+	//First we want a variable that holds the total bytes sent, this will eventually be equal to the file size
+	int bytesSentTotal = 0;
+
+	//We want to create a while loop that iterates while bytes sent is less then the file size
 	int bytesRead;
-	
-	
-
-	inputFile.read(buffer, fileSize);
-
-	/*std::cout << fileSize << std::endl;
-	*/
 
 	
-	send(clientSocket, buffer, fileSize, 0);
+	while (bytesSentTotal < fileSize) {
 
-	std::cout << "Sent" << std::endl;
+		bytesRead = inputFile.read(buffer, bufferSize).gcount();
 
+		//We need to know the amount of bytes remaining to send
+		//int bytesRemaining = fileSize - bytesSentTotal;
 
-	//while ((bytesRead = inputFile.read(buffer, bufferSize)) > 0) {
-	//	if (send(clientSocket, buffer, bytesRead, 0) == 0) {
-	//		std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
-	//		//close the inputfile
-	//		inputFile.close();
-	//		//close the socket
-	//		closesocket(clientSocket);
-	//		//clean up dll
-	//		WSACleanup();
-	//		return -1;
-	//	}
-	//	else {
-	//		std::cout << "Send went thru, here is the bytes size: " << bytesRead << std::endl;
-	//	}
-	//}
+		////We need to determine the next chunk to be sent, towards the last iteration
+		////The final chunk can be smaller than the buffer size so we use min between buffersize and remaining bytes
+		//auto quick = [](int a, int b) {
+		//	if (a < b) {
+		//		return a;
+		//	}
+		//	else {
+		//		return b;
+		//	}
+		//};
+		//int bytesToSend = quick(bufferSize,bytesRemaining);
 
 
+		//Send a chunk of data
+		if (bytesSentTotal < fileSize - bufferSize) {
+			int bytesSent = send(clientSocket, buffer, bufferSize, 0);
+			if (bytesSent == SOCKET_ERROR) {
+				std::cout << "Send failed! " << WSAGetLastError() << std::endl;
+				break;
+			}
+			//Update the total
+			bytesSentTotal += bytesSent;
+
+		}
+		else {
+			int bytesSent = send(clientSocket, buffer, bytesRead, 0);
+			//Update the total
+			bytesSentTotal += bytesSent;
+
+		}
+	
+
+		
+		//Show progress
+		std::cout << "Bytes sent: " << bytesSentTotal << " / " << fileSize << std::endl;
+
+	}
+
+
+	std::cout << "Bytes sent: " << bytesSentTotal << std::endl;
+	std::cout << "File size : " << fileSize << std::endl;
+	
+
+	
 
 
 
+
+
+
+	system("pause");
 	//close the file after its done reading it to the buffer
 	std::cout << "closed" << std::endl;
 	
