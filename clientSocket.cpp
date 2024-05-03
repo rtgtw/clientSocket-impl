@@ -27,6 +27,18 @@ auto handleFile = [](SOCKET clientSocket) {
 	std::cout << "Enter file path: ";
 	//get the line for the file
 	std::getline(std::cin, filePath);
+	
+
+	//Once we get the file path from user, we need to send that to the server for it to know which file
+	//to store in its database
+	int fileNameBytes = send(clientSocket, filePath.c_str(), filePath.size(),0);
+	if (fileNameBytes > 0) {
+		std::cout << " sent the file path heres the size: " << filePath.size() << " to the server" << std::endl;
+	}
+	else {
+		std::cout << "error: could not send file path to server" << std::endl;
+	}
+
 
 
 	//open the file to be read
@@ -79,7 +91,7 @@ auto handleFile = [](SOCKET clientSocket) {
 
 		//Send a chunk of data
 		//If bytesSentTotal is filesize - buffersize, then we can add a buffersize worth
-		if (bytesSentTotal < fileSize - bufferSize) {
+		if (bytesSentTotal <= fileSize - bufferSize) {
 			//Send a chunk of data as large as the buffer
 			int bytesSent = send(clientSocket, buffer, bufferSize, 0);
 			if (bytesSent == SOCKET_ERROR) {
@@ -197,8 +209,8 @@ int main() {
 		//detach it 
 		//push the thread into the vector
 		std::thread t1(handleFile, clientSocket);
-		threads.push_back(std::move(t1));
 		t1.join();
+		threads.push_back(std::move(t1));
 
 	}
 
